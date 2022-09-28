@@ -1,4 +1,4 @@
-package com.peterchege.scrollmall.di
+package com.peterchege.composenewsapp.di
 
 import android.app.Application
 

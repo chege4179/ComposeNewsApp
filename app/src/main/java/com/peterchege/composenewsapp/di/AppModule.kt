@@ -1,22 +1,13 @@
-package com.peterchege.scrollmall.di
+package com.peterchege.composenewsapp.di
 
-import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
-import android.provider.SyncStateContract
-import androidx.room.Room
-import com.google.firebase.messaging.FirebaseMessagingService
-import com.peterchege.scrollmall.api.ScrollmallApi
-import com.peterchege.scrollmall.room.database.ScrollMallDatabase
-import com.peterchege.scrollmall.util.Constants
+import com.peterchege.composenewsapp.api.NewsApi
+import com.peterchege.composenewsapp.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -24,12 +15,12 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideScrollMallApi():ScrollmallApi{
+    fun provideNewsApi(): NewsApi {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(SyncStateContract.Constants.BASE_URL)
+            .baseUrl(Constants.BASE_URL)
             .build()
-            .create(ScrollmallApi::class.java)
+            .create(NewsApi::class.java)
     }
 
 //    @Provides
