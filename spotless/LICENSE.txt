@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Compose News App By Peter Chege
+ * Copyright $YEAR Compose News App By Peter Chege
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.peterchege.composenewsapp.core.di
-
-import android.app.Application
-
-import dagger.hilt.android.HiltAndroidApp
-
-
-@HiltAndroidApp
-class ComposeNewsApp :Application()
