@@ -17,16 +17,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.peterchege.composenewsapp.ui.screens.AllNewsScreen
-import com.peterchege.composenewsapp.ui.screens.SavedNewsScreen
-import com.peterchege.composenewsapp.ui.screens.SearchNewsScreen
-import com.peterchege.composenewsapp.ui.screens.SingleNewsScreen
-import com.peterchege.composenewsapp.ui.theme.AppNavigation
-import com.peterchege.composenewsapp.util.Screens
+import androidx.navigation.navArgument
+import com.peterchege.composenewsapp.ui.screens.all_news.AllNewsScreen
+import com.peterchege.composenewsapp.ui.screens.saved_news.SavedNewsScreen
+import com.peterchege.composenewsapp.ui.screens.search_news.SearchNewsScreen
+import com.peterchege.composenewsapp.ui.screens.single_news.SingleNewsScreen
+import com.peterchege.composenewsapp.core.util.Screens
 
 @Composable
 fun AppNavigation(
@@ -39,8 +40,11 @@ fun AppNavigation(
         composable(Screens.DASHBOARD_SCREEN){
             DashBoardScreen(navHostController = navController)
         }
-        composable(Screens.SINGLE_NEWS_SCREEN + "/{id}"){
-            SingleNewsScreen(navController = navController)
+        composable(
+            arguments = listOf(navArgument(name = "articleId") { type = NavType.IntType }),
+            route = Screens.SINGLE_NEWS_SCREEN + "/{articleId}"
+        ){
+            SingleNewsScreen()
         }
     }
 
@@ -163,7 +167,11 @@ fun DashboardNavigation(
         composable(
             route = Screens.ALL_NEWS_SCREEN
         ){
-            AllNewsScreen(navController = navHostController)
+            AllNewsScreen(
+                navigateToSingleNewScreen = {
+                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}")
+                }
+            )
         }
         composable(
             route = Screens.SEARCH_NEWS_SCREEN
