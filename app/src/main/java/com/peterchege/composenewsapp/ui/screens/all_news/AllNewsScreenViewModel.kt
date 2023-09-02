@@ -20,10 +20,19 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.util.UiEvent
 import com.peterchege.composenewsapp.domain.models.ArticleUI
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -33,10 +42,36 @@ class AllNewsScreenViewModel @Inject constructor(
 
     ) :ViewModel() {
 
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
     val articlesPagingDataFlow: Flow<PagingData<ArticleUI>> =
         newsRepository.getTopHeadlineNews()
         .cachedIn(viewModelScope)
+
+    val bookmarkedArticles = newsRepository.getBookmarkedArticles()
+        .onStart { emptyList<ArticleUI>() }
+        .catch { emptyList<ArticleUI>() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = emptyList()
+        )
+
+
+
+    fun bookmarkedArticle(article:ArticleUI){
+        viewModelScope.launch {
+            newsRepository.bookmarkArticle(article)
+            _eventFlow.emit(UiEvent.ShowSnackbar(message = "Article added to bookmarks"))
+        }
+    }
+    fun unBookmarkArticle(articleId:Int){
+        viewModelScope.launch {
+            newsRepository.unBookmarkArticle(articleId)
+            _eventFlow.emit(UiEvent.ShowSnackbar(message = "Article removed from bookmarks"))
+        }
+    }
 
 
 

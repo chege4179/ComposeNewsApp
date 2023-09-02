@@ -29,10 +29,10 @@ interface BookmarkedNewsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBookmarkedNews(bookmarkArticleEntity: BookmarkArticleEntity)
     @Query("SELECT * FROM bookmarked_articles")
-    fun getBookmarkedNewsArticles(): Flow<List<NetworkArticle>>
+    fun getBookmarkedNewsArticles(): Flow<List<BookmarkArticleEntity>>
 
     @Query("SELECT * FROM bookmarked_articles WHERE id = :articleId")
-    fun getBookmarkedNewsArticleById(articleId:Int): Flow<NetworkArticle?>
+    fun getBookmarkedNewsArticleById(articleId:Int): Flow<BookmarkArticleEntity?>
 
     @Query("DELETE FROM bookmarked_articles WHERE id = :articleId")
     suspend fun deleteBookmarkedArticleById(articleId: Int)

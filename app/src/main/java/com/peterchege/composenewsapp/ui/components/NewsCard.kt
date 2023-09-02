@@ -26,10 +26,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,12 +52,16 @@ import com.peterchege.composenewsapp.domain.models.ArticleUI
 @Composable
 fun NewsCard(
     articleUI: ArticleUI,
-    onItemClick:(articleUI: ArticleUI) -> Unit
+    onItemClick:(articleUI: ArticleUI) -> Unit,
+    onSavedArticle:(ArticleUI) ->Unit,
+    onUnbookmarkArticle:(Int) -> Unit,
+    isBookmarked:Boolean,
+
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 2.dp,shape = RoundedCornerShape(15.dp), clip= true)
+            .shadow(elevation = 2.dp, shape = RoundedCornerShape(15.dp), clip = true)
             .clickable { onItemClick(articleUI) },
         backgroundColor = Color.White,
         shape = RoundedCornerShape(15.dp),
@@ -116,6 +126,23 @@ fun NewsCard(
                                 text = "  " + articleUI.publishedAt,
                                 modifier = Modifier.padding(vertical = 7.dp)
                             )
+                            IconButton(onClick = {
+                                if (isBookmarked){
+                                    articleUI.id?.let { it1 -> onUnbookmarkArticle(it1) }
+                                }else{
+                                    onSavedArticle(articleUI)
+                                }
+
+                            }) {
+                                Icon(
+                                    imageVector = if (isBookmarked)
+                                        Icons.Default.Bookmark
+                                    else
+                                        Icons.Default.BookmarkBorder,
+                                    contentDescription = "Save Article",
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
                         }
                     }
                 }

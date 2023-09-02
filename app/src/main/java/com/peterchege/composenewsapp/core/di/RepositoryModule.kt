@@ -44,11 +44,13 @@ object RepositoryModule {
         newsPager: Pager<Int, CachedArticleEntity>,
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
         cachedNewsDataSource: CachedNewsDataSource,
+        bookmarkedNewsDataSource: BookmarkedNewsDataSource,
     ): NewsRepository {
         return NewsRepositoryImpl(
             newsPager = newsPager,
             ioDispatcher = ioDispatcher,
             cachedNewsDataSource = cachedNewsDataSource,
+            bookmarkedNewsDataSource =  bookmarkedNewsDataSource,
         )
     }
 

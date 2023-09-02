@@ -15,7 +15,9 @@
  */
 package com.peterchege.composenewsapp.core.util
 
+import com.peterchege.composenewsapp.BuildConfig
+
 object Constants {
     const val BASE_URL = " https://newsapi.org/v2/"
-    const val API_KEY = "b15ddbbe3ad74e4ca4363e2e4954a01d"
+    const val API_KEY = BuildConfig.API_KEY
 }

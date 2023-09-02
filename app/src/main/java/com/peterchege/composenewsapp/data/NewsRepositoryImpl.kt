@@ -21,20 +21,25 @@ import androidx.paging.map
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
 import com.peterchege.composenewsapp.core.di.IoDispatcher
 import com.peterchege.composenewsapp.core.room.entity.CachedArticleEntity
+import com.peterchege.composenewsapp.domain.mappers.toBookmarkEntity
+import com.peterchege.composenewsapp.domain.mappers.toCacheEntity
 import com.peterchege.composenewsapp.domain.mappers.toExternalModel
 import com.peterchege.composenewsapp.domain.mappers.toPresentationModel
 import com.peterchege.composenewsapp.domain.models.ArticleUI
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
+import com.peterchege.composenewsapp.domain.repository.local.BookmarkedNewsDataSource
 import com.peterchege.composenewsapp.domain.repository.local.CachedNewsDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class NewsRepositoryImpl @Inject constructor(
     private val newsPager: Pager<Int, CachedArticleEntity>,
     private val cachedNewsDataSource: CachedNewsDataSource,
+    private val bookmarkedNewsDataSource: BookmarkedNewsDataSource,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : NewsRepository {
 
@@ -47,6 +52,31 @@ class NewsRepositoryImpl @Inject constructor(
     override fun getArticleById(articleId: Int): Flow<ArticleUI?> {
         return cachedNewsDataSource.getCachedNewsById(articleId)
             .map { it?.toPresentationModel() }
+            .flowOn(ioDispatcher)
+    }
+
+    override fun getBookmarkedArticles(): Flow<List<ArticleUI>> {
+        return bookmarkedNewsDataSource.getAllBookmarkedArticles()
+            .map { it.map { it.toPresentationModel() } }
+            .flowOn(ioDispatcher)
+    }
+
+    override fun getBookmarkedArticleById(articleId: Int): Flow<ArticleUI?> {
+        return bookmarkedNewsDataSource.getBookmarkedArticleById(articleId)
+            .map { it?.toPresentationModel() }
+            .flowOn(ioDispatcher)
+    }
+
+    override suspend fun bookmarkArticle(articleUI: ArticleUI) {
+        withContext(ioDispatcher){
+            bookmarkedNewsDataSource.insertBookmarkedNews(articleUI.toBookmarkEntity().toExternalModel())
+        }
+    }
+
+    override suspend fun unBookmarkArticle(articleId: Int) {
+        withContext(ioDispatcher){
+            bookmarkedNewsDataSource.deleteBookmarkedArticle(articleId)
+        }
     }
 
 }

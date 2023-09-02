@@ -196,7 +196,11 @@ fun DashboardNavigation(
         composable(
             route = Screens.SAVED_NEWS_SCREEN
         ){
-            SavedNewsScreen(navController = navHostController)
+            SavedNewsScreen(
+                navigateToSingleNewsScreen = {
+                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}")
+                }
+            )
         }
     }
 

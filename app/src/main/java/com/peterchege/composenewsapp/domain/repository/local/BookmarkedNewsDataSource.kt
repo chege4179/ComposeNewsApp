@@ -16,15 +16,16 @@
 package com.peterchege.composenewsapp.domain.repository.local
 
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.room.entity.BookmarkArticleEntity
 import kotlinx.coroutines.flow.Flow
 
 interface BookmarkedNewsDataSource {
 
     suspend fun insertBookmarkedNews(networkArticle: NetworkArticle)
 
-    fun getAllBookmarkedArticles(): Flow<List<NetworkArticle>>
+    fun getAllBookmarkedArticles(): Flow<List<BookmarkArticleEntity>>
 
-    fun getBookmarkedArticleById(articleId:Int):Flow<NetworkArticle?>
+    fun getBookmarkedArticleById(articleId:Int):Flow<BookmarkArticleEntity?>
 
     suspend fun deleteBookmarkedArticle(articleId:Int)
 

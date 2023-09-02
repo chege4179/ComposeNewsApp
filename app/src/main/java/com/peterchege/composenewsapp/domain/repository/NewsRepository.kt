@@ -25,4 +25,13 @@ interface NewsRepository {
     fun getTopHeadlineNews(): Flow<PagingData<ArticleUI>>
 
     fun getArticleById(articleId: Int):Flow<ArticleUI?>
+
+    fun getBookmarkedArticles():Flow<List<ArticleUI>>
+
+
+    fun getBookmarkedArticleById(articleId: Int):Flow<ArticleUI?>
+
+    suspend fun bookmarkArticle(articleUI: ArticleUI)
+
+    suspend fun unBookmarkArticle(articleId:Int)
 }

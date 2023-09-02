@@ -77,6 +77,20 @@ fun CachedArticleEntity.toExternalModel(): NetworkArticle{
 
 }
 
+fun ArticleUI.toBookmarkEntity():BookmarkArticleEntity{
+    return BookmarkArticleEntity(
+        id = id,
+        author = author,
+        content = content,
+        description = description,
+        publishedAt = publishedAt,
+        source = source,
+        title = title,
+        url = url,
+        urlToImage = urlToImage
+    )
+}
+
 fun CachedArticleEntity.toPresentationModel():ArticleUI{
     return ArticleUI(
         id = id,

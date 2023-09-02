@@ -18,6 +18,7 @@ package com.peterchege.composenewsapp.data.local
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
 import com.peterchege.composenewsapp.core.di.IoDispatcher
 import com.peterchege.composenewsapp.core.room.database.ComposeNewsAppDatabase
+import com.peterchege.composenewsapp.core.room.entity.BookmarkArticleEntity
 import com.peterchege.composenewsapp.domain.mappers.toBookmarkEntity
 import com.peterchege.composenewsapp.domain.repository.local.BookmarkedNewsDataSource
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,11 +37,11 @@ class BookmarkedNewsDataSourceImpl @Inject constructor(
         }
     }
 
-    override fun getAllBookmarkedArticles(): Flow<List<NetworkArticle>> {
+    override fun getAllBookmarkedArticles(): Flow<List<BookmarkArticleEntity>> {
         return db.bookmarkNewsDao.getBookmarkedNewsArticles().flowOn(ioDispatcher)
     }
 
-    override fun getBookmarkedArticleById(articleId: Int): Flow<NetworkArticle?> {
+    override fun getBookmarkedArticleById(articleId: Int): Flow<BookmarkArticleEntity?> {
         return db.bookmarkNewsDao.getBookmarkedNewsArticleById(articleId).flowOn(ioDispatcher)
     }
 

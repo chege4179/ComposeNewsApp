@@ -21,18 +21,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.util.UiEvent
 import com.peterchege.composenewsapp.domain.models.ArticleUI
+import com.peterchege.composenewsapp.ui.components.ErrorComponent
 import com.peterchege.composenewsapp.ui.components.NewsCard
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AllNewsScreen(
@@ -40,10 +46,15 @@ fun AllNewsScreen(
     viewModel: AllNewsScreenViewModel = hiltViewModel()
 ) {
     val articlesPagingItems = viewModel.articlesPagingDataFlow.collectAsLazyPagingItems()
+    val bookmarkedArticles by viewModel.bookmarkedArticles.collectAsStateWithLifecycle()
 
     AllNewsScreenContent(
         articlesPagingItems = articlesPagingItems,
-        navigateToSingleNewScreen = navigateToSingleNewScreen
+        navigateToSingleNewScreen = navigateToSingleNewScreen,
+        bookmarkedArticles = bookmarkedArticles,
+        onBookmarkArticle  = viewModel::bookmarkedArticle,
+        onUnbookmarkArticle = viewModel::unBookmarkArticle,
+        eventFlow = viewModel.eventFlow,
     )
 
 
@@ -54,7 +65,11 @@ fun AllNewsScreen(
 @Composable
 fun AllNewsScreenContent(
     navigateToSingleNewScreen:(Int) -> Unit,
+    bookmarkedArticles:List<ArticleUI>,
     articlesPagingItems: LazyPagingItems<ArticleUI>,
+    onBookmarkArticle:(ArticleUI) -> Unit,
+    onUnbookmarkArticle:(Int) -> Unit,
+    eventFlow:SharedFlow<UiEvent>,
 ) {
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(key1 = scaffoldState) {
@@ -62,6 +77,17 @@ fun AllNewsScreenContent(
             scaffoldState.snackbarHostState.showSnackbar(message = "Failed to fetch news")
         }
 
+    }
+    LaunchedEffect(key1 = true) {
+        eventFlow.collectLatest { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
+            }
+        }
     }
 
     Scaffold(
@@ -92,12 +118,15 @@ fun AllNewsScreenContent(
                 val article = articlesPagingItems[index]
                 if (article != null) {
                     NewsCard(
+                        isBookmarked = bookmarkedArticles.map { it.description }.contains(article.description),
                         articleUI = article,
                         onItemClick = {
                             it.id?.let { it1 ->
                                 navigateToSingleNewScreen(it1)
                             }
-                        }
+                        },
+                        onSavedArticle =  onBookmarkArticle,
+                        onUnbookmarkArticle = onUnbookmarkArticle
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -105,6 +134,14 @@ fun AllNewsScreenContent(
             item {
                 if (articlesPagingItems.loadState.append is LoadState.Loading) {
                     CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                }
+            }
+            item{
+                if(articlesPagingItems.loadState.append is LoadState.Error){
+                    ErrorComponent(
+                        retryCallback = { articlesPagingItems.retry() },
+                        message = "Failed to load more results"
+                    )
                 }
             }
         }

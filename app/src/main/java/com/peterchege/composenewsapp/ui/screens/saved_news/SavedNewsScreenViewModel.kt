@@ -16,10 +16,45 @@
 package com.peterchege.composenewsapp.ui.screens.saved_news
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.peterchege.composenewsapp.domain.models.ArticleUI
+import com.peterchege.composenewsapp.domain.repository.NewsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class SavedNewsScreenViewModel @Inject constructor(
+sealed interface SavedNewsScreenUiState {
+    object Loading : SavedNewsScreenUiState
 
+    data class Success(val articles: List<ArticleUI>) : SavedNewsScreenUiState
+
+    data class Error(val message: String) : SavedNewsScreenUiState
+}
+
+@HiltViewModel
+class SavedNewsScreenViewModel @Inject constructor(
+    private val repository: NewsRepository,
 ) :ViewModel(){
+
+    val uiState = repository.getBookmarkedArticles()
+        .map(SavedNewsScreenUiState::Success)
+        .onStart { SavedNewsScreenUiState.Loading }
+        .catch { SavedNewsScreenUiState.Error(message = "An unexpected error") }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = SavedNewsScreenUiState.Loading
+        )
+
+    fun unBookmarkArticle(articleId:Int){
+        viewModelScope.launch {
+            repository.unBookmarkArticle(articleId)
+        }
+    }
 
 }

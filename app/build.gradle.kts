@@ -1,8 +1,11 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     id ("com.android.application")
     id ("org.jetbrains.kotlin.android")
     id ("org.jetbrains.kotlin.plugin.serialization")
 }
+
+val apiKey: String = gradleLocalProperties(rootDir).getProperty("API_KEY")
 
 android {
     namespace =  "com.peterchege.composenewsapp"
@@ -25,7 +28,11 @@ android {
         arg("room.schemaLocation", "$projectDir/schemas")
     }
     buildTypes {
+        getByName("debug"){
+            buildConfigField("String", "API_KEY", apiKey)
+        }
         getByName("release") {
+            buildConfigField("String", "API_KEY", apiKey)
             isMinifyEnabled =  false
             proguardFiles (getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
