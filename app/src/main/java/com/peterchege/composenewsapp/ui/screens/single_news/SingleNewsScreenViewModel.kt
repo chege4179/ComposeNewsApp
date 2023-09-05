@@ -19,6 +19,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.util.Constants
 import com.peterchege.composenewsapp.domain.models.ArticleUI
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,13 +46,22 @@ class SingleNewsScreenViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ):ViewModel(){
     private val articleId = savedStateHandle.getStateFlow(key = "articleId",initialValue =0)
+    private val sourceFlow = savedStateHandle.getStateFlow(key="source", initialValue = "")
 
-
+    // check for the article from all 3 sources
     val uiState = combine(
         newsRepository.getArticleById(articleId.value),
-        newsRepository.getBookmarkedArticleById(articleId.value)
-    ){ feedArticle,bookmarkedArticle ->
-        feedArticle ?: bookmarkedArticle
+        newsRepository.getBookmarkedArticleById(articleId.value),
+        newsRepository.getSearchNewsArticleById(articleId.value),
+        sourceFlow
+    ){ feedArticle,bookmarkedArticle,searchArticle,source ->
+        when(source){
+            // ordering the search of articles based of the previous screen for correct article
+            Constants.ALL_NEW ->searchArticle ?: feedArticle?: bookmarkedArticle
+            Constants.SAVED -> bookmarkedArticle?:searchArticle?:feedArticle
+            Constants.SEARCH -> searchArticle?: feedArticle?:bookmarkedArticle
+            else -> feedArticle?: bookmarkedArticle
+        }
     }
         .map { article ->
             if (article == null){

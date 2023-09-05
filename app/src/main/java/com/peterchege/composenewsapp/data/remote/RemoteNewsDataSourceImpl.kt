@@ -35,4 +35,10 @@ class RemoteNewsDataSourceImpl @Inject constructor(
             safeApiCall { api.getTopHeadlines(page = page, pageSize = limit) }
         }
     }
+
+    override suspend fun searchNewsArticles(query: String): NetworkResult<NewsResponse> {
+        return withContext(ioDispatcher){
+            safeApiCall { api.searchNewsArticles(query = query) }
+        }
+    }
 }

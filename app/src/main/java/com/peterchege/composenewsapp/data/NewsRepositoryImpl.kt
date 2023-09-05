@@ -18,17 +18,24 @@ package com.peterchege.composenewsapp.data
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.peterchege.composenewsapp.core.api.NetworkResult
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.api.responses.NewsResponse
+import com.peterchege.composenewsapp.core.datastore.DefaultRemoteKeyProvider
 import com.peterchege.composenewsapp.core.di.IoDispatcher
 import com.peterchege.composenewsapp.core.room.entity.CachedArticleEntity
+import com.peterchege.composenewsapp.core.room.entity.SearchArticleEntity
 import com.peterchege.composenewsapp.domain.mappers.toBookmarkEntity
 import com.peterchege.composenewsapp.domain.mappers.toCacheEntity
 import com.peterchege.composenewsapp.domain.mappers.toExternalModel
 import com.peterchege.composenewsapp.domain.mappers.toPresentationModel
+import com.peterchege.composenewsapp.domain.mappers.toSearchCacheEntity
 import com.peterchege.composenewsapp.domain.models.ArticleUI
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
 import com.peterchege.composenewsapp.domain.repository.local.BookmarkedNewsDataSource
 import com.peterchege.composenewsapp.domain.repository.local.CachedNewsDataSource
+import com.peterchege.composenewsapp.domain.repository.local.SearchedNewsDataSource
+import com.peterchege.composenewsapp.domain.repository.remote.RemoteNewsDataSource
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -40,6 +47,9 @@ class NewsRepositoryImpl @Inject constructor(
     private val newsPager: Pager<Int, CachedArticleEntity>,
     private val cachedNewsDataSource: CachedNewsDataSource,
     private val bookmarkedNewsDataSource: BookmarkedNewsDataSource,
+    private val remoteNewsDataSource: RemoteNewsDataSource,
+    private val searchedNewsDataSource: SearchedNewsDataSource,
+    private val defaultRemoteKeyProvider: DefaultRemoteKeyProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : NewsRepository {
 
@@ -47,6 +57,37 @@ class NewsRepositoryImpl @Inject constructor(
         return newsPager.flow.map { pagingData ->
             pagingData.map { it.toPresentationModel() }
         }.flowOn(ioDispatcher)
+    }
+
+    override suspend fun refreshArticles() {
+        withContext(ioDispatcher){
+            cachedNewsDataSource.clearAllCachedNews()
+            defaultRemoteKeyProvider.setRemoteKey(1)
+        }
+    }
+
+    override suspend fun insertCachedSearchedNews(articles: List<NetworkArticle>) {
+        return searchedNewsDataSource.insertAllSearchedNews(items = articles.map { it.toSearchCacheEntity() })
+    }
+
+    override fun getSearchArticles(): Flow<List<ArticleUI>> {
+        return searchedNewsDataSource.getAllSearchedNews()
+            .map { it.map { it.toPresentationModel() } }
+            .flowOn(ioDispatcher)
+    }
+
+    override suspend fun deleteSearchedNews() {
+        searchedNewsDataSource.clearAllSearchedNews()
+    }
+
+    override suspend fun searchArticles(query: String): NetworkResult<NewsResponse> {
+        return remoteNewsDataSource.searchNewsArticles(query)
+    }
+
+    override fun getSearchNewsArticleById(articleId: Int): Flow<ArticleUI?> {
+        return searchedNewsDataSource.getSearchNewsById(articleId)
+            .map { it?.toPresentationModel() }
+            .flowOn(ioDispatcher)
     }
 
     override fun getArticleById(articleId: Int): Flow<ArticleUI?> {

@@ -30,4 +30,12 @@ interface NewsApi {
         @Query("pageSize") pageSize:Int = 10
     ): Response<NewsResponse>
 
+
+    @GET("everything")
+    suspend fun searchNewsArticles(
+        @Query("apiKey") apiKey :String = Constants.API_KEY,
+        @Query("q") query:String,
+        @Query("sortedBy") sortedBy:String = "popularity"
+    ): Response<NewsResponse>
+
 }

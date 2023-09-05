@@ -17,15 +17,18 @@ package com.peterchege.composenewsapp.core.di
 
 import androidx.paging.Pager
 import com.peterchege.composenewsapp.core.api.NewsApi
+import com.peterchege.composenewsapp.core.datastore.DefaultRemoteKeyProvider
 import com.peterchege.composenewsapp.core.room.database.ComposeNewsAppDatabase
 import com.peterchege.composenewsapp.core.room.entity.CachedArticleEntity
 import com.peterchege.composenewsapp.data.NewsRepositoryImpl
 import com.peterchege.composenewsapp.data.local.BookmarkedNewsDataSourceImpl
 import com.peterchege.composenewsapp.data.local.CachedNewsDataSourceImpl
+import com.peterchege.composenewsapp.data.local.SearchedNewsDataSourceImpl
 import com.peterchege.composenewsapp.data.remote.RemoteNewsDataSourceImpl
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
 import com.peterchege.composenewsapp.domain.repository.local.BookmarkedNewsDataSource
 import com.peterchege.composenewsapp.domain.repository.local.CachedNewsDataSource
+import com.peterchege.composenewsapp.domain.repository.local.SearchedNewsDataSource
 import com.peterchege.composenewsapp.domain.repository.remote.RemoteNewsDataSource
 import dagger.Module
 import dagger.Provides
@@ -45,12 +48,18 @@ object RepositoryModule {
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
         cachedNewsDataSource: CachedNewsDataSource,
         bookmarkedNewsDataSource: BookmarkedNewsDataSource,
+        defaultRemoteKeyProvider: DefaultRemoteKeyProvider,
+        remoteNewsDataSource: RemoteNewsDataSource,
+        searchedNewsDataSource: SearchedNewsDataSource,
     ): NewsRepository {
         return NewsRepositoryImpl(
             newsPager = newsPager,
             ioDispatcher = ioDispatcher,
             cachedNewsDataSource = cachedNewsDataSource,
             bookmarkedNewsDataSource =  bookmarkedNewsDataSource,
+            defaultRemoteKeyProvider = defaultRemoteKeyProvider,
+            remoteNewsDataSource = remoteNewsDataSource,
+            searchedNewsDataSource = searchedNewsDataSource,
         )
     }
 
@@ -61,6 +70,14 @@ object RepositoryModule {
         @IoDispatcher ioDispatcher: CoroutineDispatcher,
     ): CachedNewsDataSource {
         return CachedNewsDataSourceImpl(db  = db, ioDispatcher = ioDispatcher)
+    }
+    @Provides
+    @Singleton
+    fun provideSearchNewsDataSource(
+        db:ComposeNewsAppDatabase,
+        @IoDispatcher ioDispatcher: CoroutineDispatcher,
+    ): SearchedNewsDataSource {
+        return SearchedNewsDataSourceImpl(db  = db, ioDispatcher = ioDispatcher)
     }
     @Provides
     @Singleton

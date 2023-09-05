@@ -19,10 +19,25 @@ import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
 import com.peterchege.composenewsapp.core.api.responses.Source
 import com.peterchege.composenewsapp.core.room.entity.BookmarkArticleEntity
 import com.peterchege.composenewsapp.core.room.entity.CachedArticleEntity
+import com.peterchege.composenewsapp.core.room.entity.SearchArticleEntity
 import com.peterchege.composenewsapp.domain.models.ArticleUI
+import kotlin.random.Random
 
 fun NetworkArticle.toBookmarkEntity(): BookmarkArticleEntity {
     return BookmarkArticleEntity(
+        id = null,
+        author = author,
+        content = content,
+        description = description,
+        publishedAt = publishedAt,
+        source = source,
+        title = title,
+        url = url,
+        urlToImage = urlToImage
+    )
+}
+fun NetworkArticle.toSearchCacheEntity(): SearchArticleEntity {
+    return SearchArticleEntity(
         id = null,
         author = author,
         content = content,
@@ -108,6 +123,34 @@ fun CachedArticleEntity.toPresentationModel():ArticleUI{
 fun BookmarkArticleEntity.toPresentationModel():ArticleUI{
     return ArticleUI(
         id = id,
+        author = author,
+        content = content,
+        description = description,
+        publishedAt = publishedAt ?:"",
+        source = source ?: Source("",""),
+        title = title ?: "",
+        url = url ?: "",
+        urlToImage = urlToImage
+    )
+}
+
+fun SearchArticleEntity.toPresentationModel():ArticleUI{
+    return ArticleUI(
+        id = id,
+        author = author,
+        content = content,
+        description = description,
+        publishedAt = publishedAt ?:"",
+        source = source ?: Source("",""),
+        title = title ?: "",
+        url = url ?: "",
+        urlToImage = urlToImage
+    )
+}
+
+fun NetworkArticle.toPresentationModel():ArticleUI{
+    return ArticleUI(
+        id = Random(10).nextInt(),
         author = author,
         content = content,
         description = description,

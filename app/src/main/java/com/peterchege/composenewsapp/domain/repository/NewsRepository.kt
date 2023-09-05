@@ -16,7 +16,10 @@
 package com.peterchege.composenewsapp.domain.repository
 
 import androidx.paging.PagingData
+import com.peterchege.composenewsapp.core.api.NetworkResult
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
+import com.peterchege.composenewsapp.core.api.responses.NewsResponse
+import com.peterchege.composenewsapp.core.room.entity.SearchArticleEntity
 import com.peterchege.composenewsapp.domain.models.ArticleUI
 import kotlinx.coroutines.flow.Flow
 
@@ -28,10 +31,21 @@ interface NewsRepository {
 
     fun getBookmarkedArticles():Flow<List<ArticleUI>>
 
+    fun getSearchArticles():Flow<List<ArticleUI>>
+
+    suspend fun insertCachedSearchedNews(articles:List<NetworkArticle>)
+
+    suspend fun deleteSearchedNews()
 
     fun getBookmarkedArticleById(articleId: Int):Flow<ArticleUI?>
+
+    fun getSearchNewsArticleById(articleId: Int):Flow<ArticleUI?>
 
     suspend fun bookmarkArticle(articleUI: ArticleUI)
 
     suspend fun unBookmarkArticle(articleId:Int)
+
+    suspend fun searchArticles(query:String):NetworkResult<NewsResponse>
+
+    suspend fun refreshArticles()
 }

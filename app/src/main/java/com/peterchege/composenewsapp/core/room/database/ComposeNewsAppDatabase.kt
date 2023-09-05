@@ -21,17 +21,17 @@ import androidx.room.TypeConverters
 import com.peterchege.composenewsapp.core.room.converters.SourceTypeConverter
 import com.peterchege.composenewsapp.core.room.dao.BookmarkedNewsDao
 import com.peterchege.composenewsapp.core.room.dao.CachedNewsDao
-import com.peterchege.composenewsapp.core.room.dao.RemoteKeyDao
+import com.peterchege.composenewsapp.core.room.dao.SearchedNewsDao
 import com.peterchege.composenewsapp.core.room.entity.BookmarkArticleEntity
 import com.peterchege.composenewsapp.core.room.entity.CachedArticleEntity
-import com.peterchege.composenewsapp.core.room.entity.RemoteKeyEntity
+import com.peterchege.composenewsapp.core.room.entity.SearchArticleEntity
 
 
 @Database(
     entities = [
         BookmarkArticleEntity::class,
         CachedArticleEntity::class,
-        RemoteKeyEntity::class,
+        SearchArticleEntity::class
     ],
     version = 1,
     exportSchema = true,
@@ -43,7 +43,7 @@ abstract class ComposeNewsAppDatabase : RoomDatabase() {
 
     abstract val cachedNewsDao: CachedNewsDao
 
-    abstract val remoteKeyDao: RemoteKeyDao
+    abstract val searchedNewsDao:SearchedNewsDao
 
 
 }

@@ -19,15 +19,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.peterchege.composenewsapp.core.api.NetworkStatus
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
 import com.peterchege.composenewsapp.core.util.UiEvent
 import com.peterchege.composenewsapp.domain.models.ArticleUI
+import com.peterchege.composenewsapp.domain.repository.NetworkInfoRepository
 import com.peterchege.composenewsapp.domain.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
@@ -39,8 +43,19 @@ import javax.inject.Inject
 @HiltViewModel
 class AllNewsScreenViewModel @Inject constructor(
     private val newsRepository: NewsRepository,
+    private val networkInfoRepository: NetworkInfoRepository,
 
     ) :ViewModel() {
+
+    val networkStatus = networkInfoRepository.networkStatus
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = NetworkStatus.Unknown
+        )
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -58,6 +73,13 @@ class AllNewsScreenViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    fun refreshArticles(){
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            newsRepository.refreshArticles()
+            _isRefreshing.value = false
+        }
+    }
 
 
     fun bookmarkedArticle(article:ArticleUI){

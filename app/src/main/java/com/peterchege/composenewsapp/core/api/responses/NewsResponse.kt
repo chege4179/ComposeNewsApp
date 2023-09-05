@@ -19,7 +19,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NewsResponse(
-    val networkArticles: List<NetworkArticle>,
+    val articles: List<NetworkArticle>,
     val status: String = "",
     val totalResults: Int = 0
 )

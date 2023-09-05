@@ -54,11 +54,11 @@ class ArticleRemoteMediator @Inject constructor(
         return when(apiResponse){
 
             is NetworkResult.Success -> {
-                val results = apiResponse.data.networkArticles
+                val results = apiResponse.data.articles
                 val nextOffset = offset + 1
                 // SAVE RESULTS AND NEXT OFFSET TO DATABASE
                 if (loadType == LoadType.REFRESH) {
-                    println("Refresh ${results.size}")
+
                     cachedNewsDataSource.clearAllCachedNews()
                     defaultRemoteKeyProvider.setRemoteKey(1)
 

@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.peterchege.composenewsapp.core.room.dao
+package com.peterchege.composenewsapp.domain.repository.local
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import com.peterchege.composenewsapp.core.room.entity.RemoteKeyEntity
+import androidx.paging.PagingSource
+import com.peterchege.composenewsapp.core.room.entity.SearchArticleEntity
+import kotlinx.coroutines.flow.Flow
 
-@Dao
-interface RemoteKeyDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertRemoteKey(item: RemoteKeyEntity)
+interface SearchedNewsDataSource {
 
-    @Query("SELECT * FROM remote_key WHERE id = :id")
-    suspend fun getRemoteKeyById(id: String): RemoteKeyEntity?
+    suspend fun insertAllSearchedNews(items: List<SearchArticleEntity>)
 
-    @Query("DELETE FROM remote_key WHERE id = :id")
-    suspend fun deleteRemoteKeyById(id: String)
+    fun getAllSearchedNews():Flow<List<SearchArticleEntity>>
+
+
+    fun getSearchNewsById(articleId:Int): Flow<SearchArticleEntity?>
+
+    suspend fun clearAllSearchedNews()
+
 }

@@ -38,6 +38,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.peterchege.composenewsapp.core.util.Constants
 import com.peterchege.composenewsapp.ui.screens.all_news.AllNewsScreen
 import com.peterchege.composenewsapp.ui.screens.saved_news.SavedNewsScreen
 import com.peterchege.composenewsapp.ui.screens.search_news.SearchNewsScreen
@@ -56,8 +57,11 @@ fun AppNavigation(
             DashBoardScreen(navHostController = navController)
         }
         composable(
-            arguments = listOf(navArgument(name = "articleId") { type = NavType.IntType }),
-            route = Screens.SINGLE_NEWS_SCREEN + "/{articleId}"
+            arguments = listOf(
+                navArgument(name = "articleId") { type = NavType.IntType },
+                navArgument(name ="source"){ type = NavType.StringType }
+            ),
+            route = Screens.SINGLE_NEWS_SCREEN + "/{articleId}/{source}"
         ){
             SingleNewsScreen()
         }
@@ -184,21 +188,25 @@ fun DashboardNavigation(
         ){
             AllNewsScreen(
                 navigateToSingleNewScreen = {
-                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}")
+                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}/${Constants.ALL_NEW}")
                 }
             )
         }
         composable(
             route = Screens.SEARCH_NEWS_SCREEN
         ){
-            SearchNewsScreen(navController = navHostController)
+            SearchNewsScreen(
+                navigateToSingleNewsScreen = {
+                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}/${Constants.SEARCH}")
+                }
+            )
         }
         composable(
             route = Screens.SAVED_NEWS_SCREEN
         ){
             SavedNewsScreen(
                 navigateToSingleNewsScreen = {
-                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}")
+                    navHostController.navigate(route = Screens.SINGLE_NEWS_SCREEN + "/${it}//${Constants.SAVED}")
                 }
             )
         }

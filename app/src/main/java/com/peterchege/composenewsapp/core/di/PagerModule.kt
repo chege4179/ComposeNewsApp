@@ -38,7 +38,6 @@ object PagerModule {
     fun provideArticlePager(
         cachedNewsDataSource: CachedNewsDataSource,
         remoteNewsDataSource: RemoteNewsDataSource,
-
         defaultRemoteKeyProvider: DefaultRemoteKeyProvider,
     ): Pager<Int, CachedArticleEntity> {
         return Pager(

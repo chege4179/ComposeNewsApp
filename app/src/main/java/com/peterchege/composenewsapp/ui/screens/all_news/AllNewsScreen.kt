@@ -19,6 +19,10 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +36,7 @@ import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.peterchege.composenewsapp.core.api.NetworkStatus
 import com.peterchege.composenewsapp.core.api.responses.NetworkArticle
 import com.peterchege.composenewsapp.core.util.UiEvent
 import com.peterchege.composenewsapp.domain.models.ArticleUI
@@ -40,6 +45,7 @@ import com.peterchege.composenewsapp.ui.components.NewsCard
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AllNewsScreen(
     navigateToSingleNewScreen:(Int) -> Unit,
@@ -47,7 +53,23 @@ fun AllNewsScreen(
 ) {
     val articlesPagingItems = viewModel.articlesPagingDataFlow.collectAsLazyPagingItems()
     val bookmarkedArticles by viewModel.bookmarkedArticles.collectAsStateWithLifecycle()
+    val networkStatus by viewModel.networkStatus.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isRefreshing,
+        onRefresh = {
+            if (networkStatus is NetworkStatus.Connected){
+                viewModel.refreshArticles()
+            }
+        }
+    )
+
+    LaunchedEffect(key1 = networkStatus){
+        if (networkStatus is NetworkStatus.Connected){
+            viewModel.refreshArticles()
+        }
+    }
     AllNewsScreenContent(
         articlesPagingItems = articlesPagingItems,
         navigateToSingleNewScreen = navigateToSingleNewScreen,
@@ -55,12 +77,15 @@ fun AllNewsScreen(
         onBookmarkArticle  = viewModel::bookmarkedArticle,
         onUnbookmarkArticle = viewModel::unBookmarkArticle,
         eventFlow = viewModel.eventFlow,
+        pullRefreshState = pullRefreshState,
+        isRefreshing = isRefreshing,
     )
 
 
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun AllNewsScreenContent(
@@ -70,7 +95,11 @@ fun AllNewsScreenContent(
     onBookmarkArticle:(ArticleUI) -> Unit,
     onUnbookmarkArticle:(Int) -> Unit,
     eventFlow:SharedFlow<UiEvent>,
+    pullRefreshState: PullRefreshState,
+    isRefreshing:Boolean,
+
 ) {
+
     val scaffoldState = rememberScaffoldState()
     LaunchedEffect(key1 = scaffoldState) {
         if (articlesPagingItems.loadState.refresh is LoadState.Error) {
@@ -108,10 +137,16 @@ fun AllNewsScreenContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .pullRefresh(pullRefreshState)
                 .padding(paddingValues)
                 .padding(10.dp)
         ) {
-
+            item{
+                PullRefreshIndicator(
+                    refreshing = isRefreshing,
+                    state = pullRefreshState,
+                )
+            }
             items(
                 count = articlesPagingItems.itemCount,
             ) { index ->

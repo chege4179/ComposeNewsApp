@@ -22,4 +22,6 @@ interface RemoteNewsDataSource {
 
     suspend fun getTopHeadlineNews(page:Int = 1,limit:Int = 10):NetworkResult<NewsResponse>
 
+    suspend fun searchNewsArticles(query:String):NetworkResult<NewsResponse>
+
 }
