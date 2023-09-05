@@ -12,6 +12,14 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
+      - name: Create Local Properties File
+        run: cat /home/runner/work/ComposeNewsApp/ComposeNewsApp/local.properties | base64
+
+      - name: Putting API KEY in the local.properties
+        env:
+          DATA: ${{ secrets.PROPERTIES_CONTENT }}
+        run: echo $DATA > /home/runner/work/ComposeNewsApp/ComposeNewsApp/local.properties
+
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
