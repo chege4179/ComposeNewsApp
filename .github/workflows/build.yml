@@ -26,7 +26,7 @@ jobs:
           java-version: 11
 
       - name: Set up Gradle Build Action
-        uses: gradle/gradle-build-action@v2.4.2
+        uses: gradle/actions/setup-gradle@v3
         with:
           gradle-home-cache-cleanup: true
       - name: Build Debug APK
@@ -34,7 +34,7 @@ jobs:
 
 
       - name: Upload a Build Artifact (APK)
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v4
         with:
           name: app
           path: app/build/outputs/apk/debug/app-debug.apk
